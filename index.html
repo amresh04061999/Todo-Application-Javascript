@@ -9,6 +9,7 @@
       integrity="sha384-4LISF5TTJX/fLmGSxO53rV4miRxdg84mZsxmO8Rx5jGtp/LbrixFETvWa5a6sESd"
       crossorigin="anonymous"
     />
+
     <link
       rel="icon"
       type="image/png"
@@ -25,70 +26,15 @@
           <div class="img-conatiner">
             <header class="hearder">
               <h1>TODO</h1>
-              <span class="mode-icon bi bi-brightness-high-fill"></span>
+                <span class="mode-icon bi bi-brightness-high-fill" id="theme-toggle">
+                 </span>
             </header>
             <div class="input-box">
               <input type="checkbox" class="input-checkbox checkbox-round" />
-              <input type="text" placeholder="Enter number of  item" />
+              <input type="text" placeholder="Enter number of  item" id="input-value" />
             </div>
             <div class="list">
-              <div class="list-of-item">
-                <input type="checkbox" class="checkbox-round" />
-                <div class="contain">Conatent of item</div>
-                <div class="action">
-                  <i class="bi bi-trash"></i>
-                  <i class="bi bi-pencil-square"></i>
-                </div>
-              </div>
-              
-         
-              <div class="list-of-item">
-                <input type="checkbox" class="checkbox-round" />
-                <div class="contain">Conatent of item</div>
-                <div class="action">
-                  <i class="bi bi-trash"></i>
-                  <i class="bi bi-pencil-square"></i>
-                </div>
-              </div>
-              <div class="list-of-item">
-                <input type="checkbox" class="checkbox-round" />
-                <div class="contain">Conatent of item</div>
-                <div class="action">
-                  <i class="bi bi-trash"></i>
-                  <i class="bi bi-pencil-square"></i>
-                </div>
-              </div>
-              <div class="list-of-item">
-                <input type="checkbox" class="checkbox-round" />
-                <div class="contain">Conatent of item</div>
-                <div class="action">
-                  <i class="bi bi-trash"></i>
-                  <i class="bi bi-pencil-square"></i>
-                </div>
-              </div>
-              <div class="list-of-item">
-                <input type="checkbox" class="checkbox-round" />
-                <div class="contain">Conatent of item</div>
-                <div class="action">
-                  <i class="bi bi-trash"></i>
-                  <i class="bi bi-pencil-square"></i>
-                </div>
-              </div>
-              <div class="list-of-item">
-                <input type="checkbox" class="checkbox-round" />
-                <div class="contain">Conatent of item</div>
-                <div class="action">
-                  <i class="bi bi-trash"></i>
-                  <i class="bi bi-pencil-square"></i>
-                </div>
-              </div>
-              <div class="list-of-item">
-                <input type="checkbox" class="checkbox-round" />
-                <div class="contain">Conatent of item</div>
-                <div class="action">
-                  <i class="bi bi-trash"></i>
-                  <i class="bi bi-pencil-square"></i>
-                </div>
+              <div id="container"  >
               </div>
             </div>
             <footer>
@@ -108,6 +54,7 @@
         </div>
       </div>
     </div>
+
     <script src="js/index.js"></script>
   </body>
 </html>
