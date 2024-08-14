@@ -1,14 +1,11 @@
 const themeToggleBtn = document.getElementById("theme-toggle");
 const currentTheme = localStorage.getItem("theme") || "light";
 document.documentElement.setAttribute("data-theme", currentTheme);
-
 const currentcolor = localStorage.getItem("color") || "black";
-themeToggleBtn.style.color = "currentcolor";
+themeToggleBtn.style.color = currentcolor;
 
 themeToggleBtn.addEventListener("click", function () {
-  // window.location.href="https://google.com"
   let theme = document.documentElement.getAttribute("data-theme");
-  console.log(theme);
   if (theme === "light") {
     document.documentElement.setAttribute("data-theme", "dark");
     localStorage.setItem("theme", "dark");
@@ -22,39 +19,58 @@ themeToggleBtn.addEventListener("click", function () {
   }
 });
 
+
 const inputValue = document.getElementById("input-value");
-//  Post data in database
+let editKey = "";
+let completedKeys =[];
+let Keys =[];
+let loader = false;
+  const loaderDiv= document.querySelector("#loader");
+     loaderDiv.style.display="none"      
+     const blurContainer = document.querySelector("#blur-container");
+     console.log(blurContainer);
+     blurContainer.style.display = "none";
+
+// Post data to the database
 inputValue.addEventListener("keydown", function (e) {
-  if (e.key === "Enter") {
-    async function postData() {
-      const URL =
-        "https://todo-app-javascript-cd16a-default-rtdb.firebaseio.com/data.json";
-      try {
-        const response = await fetch(URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ userInput: inputValue.value }),
-        });
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        inputValue.value = "";
-        const data = await response.json();
-        if (data) {
-          getData();
-        }
-      } catch (error) {
-        console.log("error post data", error);
-      }
+  if (e.key === "Enter" && inputValue.value) {
+    if (editKey === "") {
+      postData();
+    } else {
+      editDetail();
     }
-    postData();
   }
 });
 
-// Get data in dataBase
 
+// post data 
+async function postData() {
+  const URL =
+    "https://todo-app-javascript-cd16a-default-rtdb.firebaseio.com/data.json";
+  try {
+    const response = await fetch(URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ userInput: inputValue.value, completed: false }),
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    inputValue.value = "";
+    const data = await response.json();
+    if (data) {
+      getData();
+    }
+  } catch (error) {
+    console.log("Error posting data:", error);
+  }
+}
+
+
+
+// Get data from the database
 async function getData() {
   const URL =
     "https://todo-app-javascript-cd16a-default-rtdb.firebaseio.com/data.json";
@@ -69,82 +85,107 @@ async function getData() {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
     const data = await response.json();
-
-    renderdata(data);
+    renderData(data);
   } catch (error) {
-    console.log("error post data", error);
+    console.log("Error getting data:", error);
   }
 }
-getData();
 
-//Render data
-function renderdata(data) {
+
+
+// Render data
+function renderData(data) {
   const container = document.querySelector("#container");
-  container.innerHTML = "";
+  container.innerHTML = ""; 
+// update total and left items
+const totalItem = document.getElementById("total-item");
+const leftItem = document.getElementById("left-item");
+  const totalItemsCount = !data || Object.keys(data).length === 0 ? 0 : Object.keys(data).length;
+  const itemsLeftCount = !data ? 0 : Object.keys(data).filter(key => data[key].completed === false).length;
+  totalItem.innerHTML = `${totalItemsCount} Total Items`;
+  leftItem.innerHTML = `${itemsLeftCount} Items Left`;
 
   if (!data || Object.keys(data).length === 0) {
     const p = document.createElement("p");
-    p.innerHTML = "<p>No Record Found</p>";
+    p.innerHTML = "No Record Found";
     p.classList.add(
       "d-flex",
       "justify-content-center",
-      "align-item-center",
-      "h-100"
+      "align-items-center",
+      "h-100",
+      "p-16"
     );
     container.appendChild(p);
-  }
+  }else 
+  {
+      
+    for (let key in data) {
+      if (data.hasOwnProperty(key)) {
+       const item = data[key];
+          if(data[key].completed){
+            completedKeys.push(key)
+          }
+        Keys.push(key)
+        // Create div to insert all details
+        const itemDiv = document.createElement("div");
+        itemDiv.classList.add("list-of-item");
+        
+        // Checkbox
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.checked = item.completed;
+        checkbox.classList.add("checkbox-round");
+        checkbox.addEventListener("change", (e) => {
+          checkboxFunction(key, item.userInput, e.target.checked);
+        });
+    
 
-  for (let key in data) {
-    if (data.hasOwnProperty(key)) {
-      const item = data[key];
-
-      //   create div insert all details
-      const itemDiv = document.createElement("div");
-      itemDiv.classList.add("list-of-item");
-
-      //   Checkbox
-      const checkbox = document.createElement("input");
-      checkbox.type = "checkbox";
-      checkbox.classList.add("checkbox-round");
-
-      // create p with all item
-      const userInputElement = document.createElement("p");
-      userInputElement.textContent = `${item.userInput}`;
-
-      //  Create edit icon
-      const editIcon = document.createElement("span");
-      editIcon.classList.add("bi", "bi-pencil-square");
-      editIcon.style.cursor = "pointer";
-      editIcon.addEventListener("click", (e) => {
-          editItem(key, item.userInput,e); 
-        //Change icon back to edit
-        })
-
-      // Create edit icon
-      const deleteIcon = document.createElement("span");
-      deleteIcon.classList.add("bi", "bi-trash");
-      deleteIcon.style.cursor = "pointer";
-
-      deleteIcon.addEventListener("click", (e) => {
-        if (e) {
-          deleteItem(key);
+        // User input display
+        const userInputElement = document.createElement("p");
+        userInputElement.textContent = item.userInput;
+        if (item.completed) {
+          userInputElement.style.textDecorationLine = "line-through";
         }
-      });
 
-      //Create div for action
-      const actionDiv = document.createElement("div");
-      //append action item edit icon and delete icon
-      actionDiv.append(editIcon);
-      actionDiv.append(deleteIcon);
-      //append div inside checkbox,user value , actionItem(edite icon,delete icon)
-      itemDiv.appendChild(checkbox);
-      itemDiv.appendChild(userInputElement);
-      itemDiv.appendChild(actionDiv);
-      // append container inside in conatiner
-      container.appendChild(itemDiv);
+        // Edit icon
+        const editIcon = document.createElement("span");
+        if (!item.completed) {
+          editIcon.classList.add("bi", "bi-pencil-square");
+          editIcon.style.cursor = "pointer";
+          editIcon.addEventListener("click", () => {
+            editKey = key;
+            inputValue.value = item.userInput;
+          });
+        }
+
+        // Delete icon
+        const deleteIcon = document.createElement("span");
+        deleteIcon.classList.add("bi", "bi-trash");
+        deleteIcon.style.cursor = "pointer";
+        deleteIcon.addEventListener("click", () => {
+          deleteItem(key);
+        });
+        
+        // Action div
+        const actionDiv = document.createElement("div");
+        actionDiv.append(editIcon);
+        actionDiv.append(deleteIcon);
+
+        // Append checkbox, user input, and actions to the item div
+        itemDiv.appendChild(checkbox);
+        itemDiv.appendChild(userInputElement);
+        itemDiv.appendChild(actionDiv);
+
+        // Append item div to the container
+        container.appendChild(itemDiv);
+      }
     }
+   
   }
 }
+
+
+
 
 // Delete data
 function deleteItem(key) {
@@ -162,43 +203,134 @@ function deleteItem(key) {
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
-        if (response.ok) {
-          getData();
-        }
+        getData();
       } catch (error) {
-        console.log("error post data", error);
+        console.log("Error deleting data:", error);
       }
     }
     deleteData();
   }
 }
 
+
+
 // Edit details
-function editItem(key, data) {
-  if (data) {
-    inputValue.value = data;
-      async function editDetail() {
-        const URL = `https://todo-app-javascript-cd16a-default-rtdb.firebaseio.com/data/${key}.json`;
-        try {
-          const response = await fetch(URL, {
-            method: "PATCH",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ userInput: data }),
-          });
-    
-          if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-          }
-          if (response.ok) {
-            getData();
-          }
-        } catch (error) {
-          console.log("error updated data", error);
-        }
+function editDetail() {
+  const URL = `https://todo-app-javascript-cd16a-default-rtdb.firebaseio.com/data/${editKey}.json`;
+  async function updateData() {
+    try {
+      const response = await fetch(URL, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userInput: inputValue.value }),
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
       }
-      editDetail()
+      inputValue.value = "";
+      editKey = ""; // Reset editKey after updating
+      getData();
+    } catch (error) {
+      console.log("Error updating data:", error);
     }
-  
+  }
+  updateData();
 }
+
+
+function checkboxFunction(key, data, checkBoxValue) {
+  const URL = `https://todo-app-javascript-cd16a-default-rtdb.firebaseio.com/data/${key}.json`;
+  async function updateData() {
+    try {
+      const response = await fetch(URL, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userInput: data, completed: checkBoxValue }),
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      inputValue.value = "";
+      editKey = "";
+      getData();
+    } catch (error) {
+      console.log("Error updating data:", error);
+    }
+  }
+  updateData();
+}
+
+if(completedKeys.length === 0){
+  const clearCompleted = document.getElementById("clearCompleted");
+  // Add event listener to clear completed items
+  clearCompleted.addEventListener("click", async () => {
+   if (confirm("Are you sure you want to delete all completed items?")) {
+       deleteCompletedItem(completedKeys); 
+   }
+ });
+}
+
+//  Delete all completed items
+async function deleteCompletedItem(keys) {
+  const updates = {};
+  keys.forEach(key => {
+    updates[`${key}`] = null;
+  });
+  const URL = `https://todo-app-javascript-cd16a-default-rtdb.firebaseio.com/data/`;
+  try {
+    const response = await fetch(`${URL}.json`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body:JSON.stringify(updates)
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    console.log(`Deleted item with key: ${keys}`);
+    getData(); // Refresh data after deletion
+  } catch (error) {
+    console.log("Error deleting data:", error);
+  }
+}
+if(Keys.length === 0){
+  const clearAll = document.getElementById("clearAll");
+  // Add event listener to clear completed items
+  clearAll.addEventListener("click", async () => {
+   if (confirm("Are you sure you want to delete all items?")) {
+    deleteAllItems(Keys); 
+   }
+ });
+}
+// Delete  all items
+async function deleteAllItems(Keys) {
+  const updates = {};
+  Keys.forEach(key => {
+    updates[`${key}`] = null;
+  });
+  const URL = `https://todo-app-javascript-cd16a-default-rtdb.firebaseio.com/data/`;
+  try {
+    const response = await fetch(`${URL}.json`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body:JSON.stringify(updates)
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    getData(); // Refresh data after deletion
+    console.log(`Deleted item with key: ${keys}`);
+  } catch (error) {
+    console.log("Error deleting data:", error);
+  }
+}
+
+
+getData();

@@ -20,32 +20,38 @@
     <link rel="stylesheet" href="css/style.css" />
   </head>
   <body>
+    <div class="container" id="blur-container"></div>
+    <div class="loader" id="loader"></div>
     <div class="wrapper-container">
       <div class="bg-image">
         <div class="image-wrapper">
           <div class="img-conatiner">
-            <header class="hearder">
+            <header class="header">
               <h1>TODO</h1>
                 <span class="mode-icon bi bi-brightness-high-fill" id="theme-toggle">
                  </span>
             </header>
-            <div class="input-box">
+            <div class="input-box"> 
               <input type="checkbox" class="input-checkbox checkbox-round" />
-              <input type="text" placeholder="Enter number of  item" id="input-value" />
+              <input type="text" placeholder="Enter item" id="input-value" />
             </div>
             <div class="list">
               <div id="container"  >
               </div>
             </div>
             <footer>
-              <span class="nowrape">5 items left</span>
-              <div class="footer-item">
-                <span>All</span>
-                <span>Active</span>
-                <span>Completed</span>
-              </div>
-              <span class="nowrape"> Clear Completed</span>
+              <span class="nowrape" id="total-item"></span>
+              <span class="nowrape" id="left-item"></span>
+              <span class="nowrape cursor-pointer"  id="clearCompleted"> Clear Completed</span>
+              <span class="nowrape cursor-pointer" id="clearAll"> Clear All</span>
             </footer>
+            <div class="footer-item">
+              <ul >
+                <li>All</li>
+                <li>Active</li>
+                <li>Completed</li>
+              </ul>
+            </div>
             <div  class="footer">
               <span> Drag and drop to recoder list</span>
             </div>
@@ -54,7 +60,7 @@
         </div>
       </div>
     </div>
-
+    
     <script src="js/index.js"></script>
   </body>
 </html>
