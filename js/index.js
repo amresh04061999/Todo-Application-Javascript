@@ -19,17 +19,24 @@ themeToggleBtn.addEventListener("click", function () {
   }
 });
 
-
 const inputValue = document.getElementById("input-value");
 let editKey = "";
-let completedKeys =[];
-let Keys =[];
-let loader = false;
-  const loaderDiv= document.querySelector("#loader");
-     loaderDiv.style.display="none"      
-     const blurContainer = document.querySelector("#blur-container");
-     console.log(blurContainer);
-     blurContainer.style.display = "none";
+let completedKeys = [];
+let Keys = [];
+
+function showLoader() {
+  const blurContainer = document.querySelector("#blur-container");
+  const loader = document.querySelector("#loader");
+  loader.classList.remove("hidden");
+  blurContainer.classList.add("blur-container");
+}
+
+function hideLoader() {
+  const blurContainer = document.querySelector("#blur-container");
+  const loader = document.querySelector("#loader");
+  loader.classList.add("hidden");
+  blurContainer.classList.remove("blur-container");
+}
 
 // Post data to the database
 inputValue.addEventListener("keydown", function (e) {
@@ -42,8 +49,7 @@ inputValue.addEventListener("keydown", function (e) {
   }
 });
 
-
-// post data 
+// post data
 async function postData() {
   const URL =
     "https://todo-app-javascript-cd16a-default-rtdb.firebaseio.com/data.json";
@@ -68,10 +74,9 @@ async function postData() {
   }
 }
 
-
-
 // Get data from the database
 async function getData() {
+  showLoader();
   const URL =
     "https://todo-app-javascript-cd16a-default-rtdb.firebaseio.com/data.json";
   try {
@@ -91,21 +96,55 @@ async function getData() {
   }
 }
 
-
+// Render data
+// Function to handle individual checkbox state changes
+function checkboxFunction(key, userInput, isChecked) {
+  // Update the data model and UI based on the checkbox state
+  console.log(
+    `Checkbox for ${userInput} is now ${isChecked ? "checked" : "unchecked"}.`
+  );
+  // You would update your data here accordingly
+}
 
 // Render data
+
+let filter = "all"; // Initialize filter with default value
+
 function renderData(data) {
+  const tabs = document.querySelectorAll(".tab");
+
+  // Function to remove the active class from all tabs
+  function removeActiveClass() {
+    tabs.forEach((tab) => tab.classList.remove("active"));
+  }
+
+  tabs.forEach((tab) => {
+    tab.addEventListener("click", function () {
+      removeActiveClass();
+      tab.classList.add("active");
+
+      filter = tab.getAttribute("data-filter"); // Update the filter based on the selected tab
+      console.log(filter);
+
+      // Re-render data based on the new filter
+      renderData(data);
+    });
+  });
+
   const container = document.querySelector("#container");
-  container.innerHTML = ""; 
-// update total and left items
-const totalItem = document.getElementById("total-item");
-const leftItem = document.getElementById("left-item");
-  const totalItemsCount = !data || Object.keys(data).length === 0 ? 0 : Object.keys(data).length;
-  const itemsLeftCount = !data ? 0 : Object.keys(data).filter(key => data[key].completed === false).length;
+  container.innerHTML = "";
+  const totalItem = document.getElementById("total-item");
+  const leftItem = document.getElementById("left-item");
+
+  const totalItemsCount = !data ? 0 : Object.keys(data).length;
+  const itemsLeftCount = !data
+    ? 0
+    : Object.keys(data).filter((key) => !data[key].completed).length;
+
   totalItem.innerHTML = `${totalItemsCount} Total Items`;
   leftItem.innerHTML = `${itemsLeftCount} Items Left`;
 
-  if (!data || Object.keys(data).length === 0) {
+  if (totalItemsCount === 0) {
     const p = document.createElement("p");
     p.innerHTML = "No Record Found";
     p.classList.add(
@@ -116,76 +155,102 @@ const leftItem = document.getElementById("left-item");
       "p-16"
     );
     container.appendChild(p);
-  }else 
-  {
-      
-    for (let key in data) {
-      if (data.hasOwnProperty(key)) {
-       const item = data[key];
-          if(data[key].completed){
-            completedKeys.push(key)
-          }
-        Keys.push(key)
-        // Create div to insert all details
-        const itemDiv = document.createElement("div");
-        itemDiv.classList.add("list-of-item");
-        
-        // Checkbox
-        const checkbox = document.createElement("input");
-        checkbox.type = "checkbox";
-        checkbox.checked = item.completed;
-        checkbox.classList.add("checkbox-round");
-        checkbox.addEventListener("change", (e) => {
-          checkboxFunction(key, item.userInput, e.target.checked);
-        });
-    
-
-        // User input display
-        const userInputElement = document.createElement("p");
-        userInputElement.textContent = item.userInput;
-        if (item.completed) {
-          userInputElement.style.textDecorationLine = "line-through";
-        }
-
-        // Edit icon
-        const editIcon = document.createElement("span");
-        if (!item.completed) {
-          editIcon.classList.add("bi", "bi-pencil-square");
-          editIcon.style.cursor = "pointer";
-          editIcon.addEventListener("click", () => {
-            editKey = key;
-            inputValue.value = item.userInput;
-          });
-        }
-
-        // Delete icon
-        const deleteIcon = document.createElement("span");
-        deleteIcon.classList.add("bi", "bi-trash");
-        deleteIcon.style.cursor = "pointer";
-        deleteIcon.addEventListener("click", () => {
-          deleteItem(key);
-        });
-        
-        // Action div
-        const actionDiv = document.createElement("div");
-        actionDiv.append(editIcon);
-        actionDiv.append(deleteIcon);
-
-        // Append checkbox, user input, and actions to the item div
-        itemDiv.appendChild(checkbox);
-        itemDiv.appendChild(userInputElement);
-        itemDiv.appendChild(actionDiv);
-
-        // Append item div to the container
-        container.appendChild(itemDiv);
-      }
+  } else {
+    let filteredTodos;
+    if (filter === "active") {
+      filteredTodos = Object.keys(data).filter((key) => !data[key].completed);
+    } else if (filter === "completed") {
+      filteredTodos = Object.keys(data).filter((key) => data[key].completed);
+    } else {
+      filteredTodos = Object.keys(data);
     }
-   
+
+    for (let key of filteredTodos) {
+      const item = data[key];
+      completedKeys.push(key);
+      // Create div to insert all details
+      const itemDiv = document.createElement("div");
+      itemDiv.classList.add("list-of-item");
+      
+
+      // Checkbox
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.checked = item.completed;
+      checkbox.classList.add("checkbox-round");
+      checkbox.setAttribute("data-key", key); // Storing the key for later use
+
+      // Handle individual checkbox changes
+      checkbox.addEventListener("change", (e) => {
+        checkboxFunction(key, item.userInput, e.target.checked);
+        updateCheckAllStatus();
+      });
+
+      // User input display
+      const userInputElement = document.createElement("p");
+      userInputElement.textContent = item.userInput;
+      if (item.completed) {
+        userInputElement.style.textDecorationLine = "line-through";
+      }
+
+      // Edit and delete icons
+      const editIcon = document.createElement("span");
+      if (!item.completed) {
+        editIcon.classList.add("bi", "bi-pencil-square");
+        editIcon.style.cursor = "pointer";
+        editIcon.addEventListener("click", () => {
+          editKey = key;
+          inputValue.value = item.userInput;
+        });
+      }
+
+      const deleteIcon = document.createElement("span");
+      deleteIcon.classList.add("bi", "bi-trash");
+      deleteIcon.style.cursor = "pointer";
+      deleteIcon.addEventListener("click", () => {
+        deleteItem(key);
+      });
+
+      // Action div
+      const actionDiv = document.createElement("div");
+      actionDiv.append(editIcon);
+      actionDiv.append(deleteIcon);
+
+      // Append checkbox, user input, and actions to the item div
+      itemDiv.appendChild(checkbox);
+      itemDiv.appendChild(userInputElement);
+      itemDiv.appendChild(actionDiv);
+
+      // Append item div to the container
+      container.appendChild(itemDiv);
+    }
+
+    // Check All functionality
+    const CheckAll = document.querySelector("#CheckAll");
+    CheckAll.addEventListener("change", (e) => {
+      const allCheckboxes = document.querySelectorAll(".checkbox-round");
+      allCheckboxes.forEach((checkbox) => {
+        checkbox.checked = e.target.checked;
+        const key = checkbox.getAttribute("data-key");
+        checkboxFunction(key, data[key].userInput, checkbox.checked);
+      });
+    });
+
+    // Update the "Check All" checkbox state based on individual checkboxes
+    function updateCheckAllStatus() {
+      const allCheckboxes = document.querySelectorAll(".checkbox-round");
+      const allChecked = Array.from(allCheckboxes).every(
+        (checkbox) => checkbox.checked
+      );
+      CheckAll.checked = allChecked;
+    }
+
+    // Initial status check
+    updateCheckAllStatus();
   }
+
+  hideLoader();
 }
-
-
-
 
 // Delete data
 function deleteItem(key) {
@@ -212,8 +277,6 @@ function deleteItem(key) {
   }
 }
 
-
-
 // Edit details
 function editDetail() {
   const URL = `https://todo-app-javascript-cd16a-default-rtdb.firebaseio.com/data/${editKey}.json`;
@@ -239,7 +302,6 @@ function editDetail() {
   updateData();
 }
 
-
 function checkboxFunction(key, data, checkBoxValue) {
   const URL = `https://todo-app-javascript-cd16a-default-rtdb.firebaseio.com/data/${key}.json`;
   async function updateData() {
@@ -264,22 +326,22 @@ function checkboxFunction(key, data, checkBoxValue) {
   updateData();
 }
 
-if(completedKeys.length === 0){
-  const clearCompleted = document.getElementById("clearCompleted");
-  // Add event listener to clear completed items
-  clearCompleted.addEventListener("click", async () => {
-   if (confirm("Are you sure you want to delete all completed items?")) {
-       deleteCompletedItem(completedKeys); 
-   }
- });
-}
+const clearCompleted = document.getElementById("clearCompleted");
+// Add event listener to clear completed items
+clearCompleted.addEventListener("click", async () => {
+  if (confirm("Are you sure you want to delete all completed items?")) {
+    deleteCompletedItem(completedKeys);
+  }
+});
 
 //  Delete all completed items
 async function deleteCompletedItem(keys) {
   const updates = {};
-  keys.forEach(key => {
+  keys.forEach((key) => {
     updates[`${key}`] = null;
   });
+  console.log(updates);
+
   const URL = `https://todo-app-javascript-cd16a-default-rtdb.firebaseio.com/data/`;
   try {
     const response = await fetch(`${URL}.json`, {
@@ -287,7 +349,7 @@ async function deleteCompletedItem(keys) {
       headers: {
         "Content-Type": "application/json",
       },
-      body:JSON.stringify(updates)
+      body: JSON.stringify(updates),
     });
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
@@ -298,19 +360,19 @@ async function deleteCompletedItem(keys) {
     console.log("Error deleting data:", error);
   }
 }
-if(Keys.length === 0){
+if (Keys.length === 0) {
   const clearAll = document.getElementById("clearAll");
   // Add event listener to clear completed items
   clearAll.addEventListener("click", async () => {
-   if (confirm("Are you sure you want to delete all items?")) {
-    deleteAllItems(Keys); 
-   }
- });
+    if (confirm("Are you sure you want to delete all items?")) {
+      deleteAllItems(Keys);
+    }
+  });
 }
 // Delete  all items
 async function deleteAllItems(Keys) {
   const updates = {};
-  Keys.forEach(key => {
+  Keys.forEach((key) => {
     updates[`${key}`] = null;
   });
   const URL = `https://todo-app-javascript-cd16a-default-rtdb.firebaseio.com/data/`;
@@ -320,7 +382,7 @@ async function deleteAllItems(Keys) {
       headers: {
         "Content-Type": "application/json",
       },
-      body:JSON.stringify(updates)
+      body: JSON.stringify(updates),
     });
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
@@ -331,6 +393,5 @@ async function deleteAllItems(Keys) {
     console.log("Error deleting data:", error);
   }
 }
-
 
 getData();
