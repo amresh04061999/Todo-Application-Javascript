@@ -27,6 +27,8 @@ function googleSignIn() {
     .then((result) => {
       const user = result.user;
       currentUserId = user.uid;
+      console.log(currentUserId);
+      localStorage.setItem("currentUserId",currentUserId)
       
       if (currentUserId) {
         console.log("User signed in with Google:", user);
@@ -63,7 +65,7 @@ function storeUserData(userId, user) {
     username: user.displayName,
     email: user.email,
     profile_picture: user.photoURL,
-    todos: [] // Initialize with an empty array of todos or other data if necessary
+    todos: [] 
   })
   .then(() => {
     console.log("User data stored successfully.");
@@ -74,6 +76,7 @@ function storeUserData(userId, user) {
     console.error("Error storing user data:", error.message);
   });
 }
+console.log();
 
 // Handle Auth State Changes
 onAuthStateChanged(auth, (user) => {
@@ -82,9 +85,13 @@ onAuthStateChanged(auth, (user) => {
     console.log("User is logged in:", user);
     // Access the first element with the class 'signIn'
     const signInElements = document.getElementsByClassName("signIn");
+    const afterLogin = document.getElementsByClassName("afterLogin");
+    document.getElementById("input-value").readOnly=false;
     if (signInElements.length > 0) {
       signInElements[0].style.display = "none";
+      afterLogin[0].style.display = "block";
     }
+   
 
     // Access the element with the id 'signOut'
     const signOutButton = document.getElementsByClassName("signOut");
@@ -97,9 +104,13 @@ onAuthStateChanged(auth, (user) => {
     console.log("User is logged out");
    // Access the element with the id 'googleSignInButton'
    const signInButton = document.getElementsByClassName("signIn");
+   const afterLogin = document.getElementsByClassName("afterLogin");
+    document.getElementById("input-value").readOnly=true;
    if (signInButton) {
      signInButton[0].style.display = "block";
-   }
+     afterLogin[0].style.display = "none";
+    }
+ 
 
    // Access the element with the id 'googleSignOutButton'
    const signOutButton = document.getElementsByClassName("signOut");
@@ -108,18 +119,20 @@ onAuthStateChanged(auth, (user) => {
    }
   }
 });
+
 // signout
 function googleSignOut(){
   signOut(auth).then(() => {
     getData(); 
-    // localStorage.clear()
+    localStorage.clear()
   }).catch((error) => {
-    // An error happened.
   });
 }
+
 document.getElementById("googleSignInButton").addEventListener("click", googleSignIn);
 document.getElementById("googleSignioutButton").addEventListener("click", googleSignOut);
 
+// set light mode and dark mode
 const themeToggleBtn = document.getElementById("theme-toggle");
 const currentTheme = localStorage.getItem("theme") || "light";
 document.documentElement.setAttribute("data-theme", currentTheme);
@@ -140,12 +153,13 @@ themeToggleBtn.addEventListener("click", function () {
     themeToggleBtn.style.color = "black";
   }
 });
-
 const inputValue = document.getElementById("input-value");
+
 let editKey = "";
 let completedKeys = [];
 let Keys = [];
 
+// show loader
 function showLoader() {
   const blurContainer = document.querySelector("#blur-container");
   const loader = document.querySelector("#loader");
@@ -153,6 +167,7 @@ function showLoader() {
   blurContainer.classList.add("blur-container");
 }
 
+// hide loader
 function hideLoader() {
   const blurContainer = document.querySelector("#blur-container");
   const loader = document.querySelector("#loader");
@@ -160,7 +175,7 @@ function hideLoader() {
   blurContainer.classList.remove("blur-container");
 }
 
-// Post data to the database
+// Post data to the database using enty kys value
 inputValue.addEventListener("keydown", function (e) {
   if (e.key === "Enter" && inputValue.value) {
     if (editKey === "") {
@@ -193,12 +208,15 @@ inputValue.addEventListener("keydown", function (e) {
 // }
 // Get Data from Firebase
 async function getData() {
+ const currentUserId= localStorage.getItem("currentUserId")
   showLoader();
   const userRef = ref(database, `users/${currentUserId}/todos`);
   try {
     const snapshot = await get(userRef);
     if (snapshot.exists()) {
       renderData(snapshot.val());
+      console.log(snapshot.val());
+      
     } else {
       renderData(null);
     }
@@ -232,7 +250,9 @@ async function getData() {
 //   }
 // }
 // Post Data to Firebase
+
 async function postData() {
+
   const userRef = ref(database, `users/${currentUserId}/todos`);
   try {
     const newTodoRef = push(userRef);
@@ -249,12 +269,11 @@ async function postData() {
 
 
 // Render data
-
-
 let filter = "all";
 function renderData(data) {
+  console.log(data);
+  
   const tabs = document.querySelectorAll(".tab");
-
   // Function to remove the active class from all tabs
   function removeActiveClass() {
     tabs.forEach((tab) => tab.classList.remove("active"));
@@ -304,35 +323,29 @@ function renderData(data) {
     } else {
       filteredTodos = Object.keys(data);
     }
-
-    for (let key of filteredTodos) {
+    for (let key of filteredTodos .reverse()) {
       const item = data[key];
       completedKeys.push(key);
       // Create div to insert all details
       const itemDiv = document.createElement("div");
       itemDiv.classList.add("list-of-item");
-      
-
       // Checkbox
       const checkbox = document.createElement("input");
       checkbox.type = "checkbox";
       checkbox.checked = item.completed;
       checkbox.classList.add("checkbox-round");
       checkbox.setAttribute("data-key", key); // Storing the key for later use
-
       // Handle individual checkbox changes
       checkbox.addEventListener("change", (e) => {
         checkboxFunction(key, item.userInput, e.target.checked);
         updateCheckAllStatus();
       });
-
       // User input display
       const userInputElement = document.createElement("p");
       userInputElement.textContent = item.userInput;
       if (item.completed) {
         userInputElement.style.textDecorationLine = "line-through";
       }
-
       // Edit and delete icons
       const editIcon = document.createElement("span");
       if (!item.completed) {
@@ -343,7 +356,6 @@ function renderData(data) {
           inputValue.value = item.userInput;
         });
       }
-
       const deleteIcon = document.createElement("span");
       deleteIcon.classList.add("bi", "bi-trash");
       deleteIcon.style.cursor = "pointer";
@@ -355,38 +367,13 @@ function renderData(data) {
       const actionDiv = document.createElement("div");
       actionDiv.append(editIcon);
       actionDiv.append(deleteIcon);
-
       // Append checkbox, user input, and actions to the item div
       itemDiv.appendChild(checkbox);
       itemDiv.appendChild(userInputElement);
       itemDiv.appendChild(actionDiv);
-
       // Append item div to the container
       container.appendChild(itemDiv);
     }
-
-    // Check All functionality
-    const CheckAll = document.querySelector("#CheckAll");
-    CheckAll.addEventListener("change", (e) => {
-      const allCheckboxes = document.querySelectorAll(".checkbox-round");
-      allCheckboxes.forEach((checkbox) => {
-        checkbox.checked = e.target.checked;
-        const key = checkbox.getAttribute("data-key");
-        checkboxFunction(key, data[key].userInput, checkbox.checked);
-      });
-    });
-
-    // Update the "Check All" checkbox state based on individual checkboxes
-    function updateCheckAllStatus() {
-      const allCheckboxes = document.querySelectorAll(".checkbox-round");
-      const allChecked = Array.from(allCheckboxes).every(
-        (checkbox) => checkbox.checked
-      );
-      CheckAll.checked = allChecked;
-    }
-
-    // Initial status check
-    updateCheckAllStatus();
   }
 
   hideLoader();
@@ -456,6 +443,7 @@ function deleteItem(key) {
 // }
 // Edit Details
 function editDetail() {
+
   const itemRef = ref(database, `users/${currentUserId}/todos/${editKey}`);
   update(itemRef, { userInput: inputValue.value })
     .then(() => {
@@ -538,19 +526,19 @@ clearCompleted.addEventListener("click", async () => {
 //   }
 // }
 // Clear Completed Items
-// async function deleteCompletedItem(keys) {
-//   const userRef = ref(database, `users/${currentUserId}/todos`);
-//   const updates = {};
-//   keys.forEach((key) => {
-//     updates[key] = null;
-//   });
-//   try {
-//     await update(userRef, updates);
-//     getData();
-//   } catch (error) {
-//     console.log("Error deleting data:", error);
-//   }
-// }
+async function deleteCompletedItem(keys) {
+  const userRef = ref(database, `users/${currentUserId}/todos`);
+  const updates = {};
+  keys.forEach((key) => {
+    updates[key] = null;
+  });
+  try {
+    await update(userRef, updates);
+    getData();
+  } catch (error) {
+    console.log("Error deleting data:", error);
+  }
+}
 if (Keys.length === 0) {
   const clearAll = document.getElementById("clearAll");
   // Add event listener to clear completed items
@@ -559,6 +547,7 @@ if (Keys.length === 0) {
       deleteAllItems(Keys);
     }
   });
+  getData();
 }
 // Delete  all items
 // async function deleteAllItems(Keys) {
@@ -585,16 +574,16 @@ if (Keys.length === 0) {
 //   }
 // }
 // Delete All Items
-// async function deleteAllItems(Keys) {
-//   const userRef = ref(database, `users/${currentUserId}/todos`);
-//   try {
-//     await update(userRef, null);
-//     getData();
-//   } catch (error) {
-//     console.log("Error deleting data:", error);
-//   }
-// }
-getData();
+async function deleteAllItems(Keys) {
+  const userRef = ref(database, `users/${currentUserId}/todos`);
+  try {
+    await update(userRef, null);
+    getData();
+  } catch (error) {
+    console.log("Error deleting data:", error);
+  }
+}
+
 
 
 // function showConfirmBox() {

@@ -202,7 +202,7 @@ body {
   overflow: auto;
   background-color: var(--background-color);
   color: var(--text-color);
-  max-height: 300px;
+  max-height: 250px;
   border: 1px solid #333131;
 }
 .list-of-item {
