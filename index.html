@@ -27,10 +27,13 @@
       
         <div class="bg-image">
           <div class="profile">
-            <!-- <div class="profile-image">
-              <img src="./images/profile.png" alt="profile" srcset=""></div> -->
+       <div class="profile-image">
+              <img src="./images/profile-user.png" id="profileImage" alt="profile"></div> 
             <div class="signIn" id="googleSignInButton">Login</div>
-            <div class="signOut" id="googleSignioutButton">Logout</div>
+            <div class="signOut" id="googleSignioutButton">
+              <div id="userName"></div>
+              <div  style="font-size: 12px; margin-left: 5px;">Logout</div>
+            </div>
           </div>
           <div class="image-wrapper">
             <div class="img-conatiner">
@@ -45,6 +48,12 @@
               <div class="input-box">
                 <input type="checkbox" class="input-checkbox checkbox-round"  id="CheckAll" disabled/>
                 <input type="text" placeholder="Enter item" id="input-value" />
+              </div>
+              <div  id="beforeMessage">
+                <div class="todoImage">
+                  <img src="./images/totimage.png" alt=""  srcset="">
+                </div>
+                <div class="message">You are now logged in! add your to-do items</div>
               </div>
               <div class="afterLogin">
               <div class="ShowItem">
@@ -74,68 +83,16 @@
             </div>
           </div>
         </div>
-        <!-- <button onclick="showConfirmBox()">Click Me</button> -->
         <div id="confirmBox">
           <div class="confirm-content">
               <h2>Are you sure?</h2>
               <p>Do you really want to proceed with this action?</p>
               <div class="confirm-buttons">
-                  <button class="btn-confirm" onclick="handleConfirm(true)">Yes</button>
-                  <button class="btn-cancel" onclick="handleConfirm(false)">No</button>
+                  <button class="btn-confirm" id="confirm">Yes</button>
+                  <button class="btn-cancel"id="cancel">No</button>
               </div>
           </div>
       </div>
-      <script type="module">
-        // // Import the necessary functions from Firebase SDKs
-        // import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-        // import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-analytics.js";
-        // import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-  
-        // // Your Firebase configuration
-        // const firebaseConfig = {
-        //   apiKey: "AIzaSyDlOzaOItsULh6D9bSbXfayh0bYoYZduJc",
-        //   authDomain: "todo-app-javascript-cd16a.firebaseapp.com",
-        //   databaseURL: "https://todo-app-javascript-cd16a-default-rtdb.firebaseio.com",
-        //   projectId: "todo-app-javascript-cd16a",
-        //   storageBucket: "todo-app-javascript-cd16a.appspot.com",
-        //   messagingSenderId: "685467623041",
-        //   appId: "1:685467623041:web:5486f224a7c572d49bf780",
-        //   measurementId: "G-PZ65MB7YY0"
-        // };
-  
-        // // Initialize Firebase
-        // const app = initializeApp(firebaseConfig);
-        // const analytics = getAnalytics(app);
-        // const auth = getAuth(app);
-  
-        // // Google Sign-In Functionality
-        // function googleSignIn() {
-        //   const provider = new GoogleAuthProvider();
-        //   signInWithPopup(auth, provider)
-        //     .then((result) => {
-        //       const user = result.user;
-        //       console.log("User signed in with Google:", user);
-        //       // Fetch data or update UI with user information
-        //     })
-        //     .catch((error) => {
-        //       console.error("Error during Google sign-in:", error.message);
-        //     });
-        // }
-  
-        // // Add event listener to Google Sign-In button
-        // document.getElementById("googleSignInButton").addEventListener("click", googleSignIn);
-  
-        // // Handle Auth State Changes
-        // onAuthStateChanged(auth, (user) => {
-        //   if (user) {
-        //     console.log("User is logged in:", user);
-        //     // Fetch user-specific data or update UI
-        //   } else {
-        //     console.log("User is logged out");
-        //     // Optionally redirect or update UI for logged-out state
-        //   }
-        // });
-      </script>
-    <script src="js/index.js" type="module"></script>
+      <script src="js/index.js" type="module"></script>
   </body>
 </html>
