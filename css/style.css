@@ -25,6 +25,10 @@ body {
 body {
   overflow: hidden;
   position: relative;
+
+}
+body.always-visible {
+  scrollbar-width: auto;
 }
 /* helper class */
 .h-100 {
@@ -173,10 +177,19 @@ body {
   top: 70px;
   left: 12px;
 }
+#edit-mode-cancel{
+  position: absolute;
+  right: 0;
+  top: 65px;
+  z-index: 0;
+  padding-right: 10px;
+  font-size: 25px;
+  color:var(--text-color);
+  
+}
 .input-box > input[type="text"] {
   width: 100%;
   margin-top: 50px;
-  margin-bottom: ;
   padding: 20px 20px 20px 50px;
   border-radius: 10px;
   font-size: 16px;
@@ -278,12 +291,12 @@ footer {
   animation-timing-function: linear;
 }
 .message{
-  font-size: 25px;
+font-size: 25px;
 margin-top: 5px;
 display: flex;
 justify-content:center ;
 align-items: center;
-  color: var(--text-color);
+color: var(--text-color);
 }
 .todoImage{
 margin-top: 35px;
@@ -304,7 +317,7 @@ margin-top: 35px;
 
 /* width */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 10px;
 }
 
 /* Track */
@@ -323,6 +336,8 @@ margin-top: 35px;
 ::-webkit-scrollbar-thumb:hover {
   background: grey;
 }
+
+
 
 /* profile  */
 .profile {
@@ -361,25 +376,25 @@ cursor: pointer;
   z-index: 1000;
 
 }
-
 .confirm-content {
   margin: 20px;
-  background-color: #fff;
+  background-color: var(--background-color);
   padding: 20px;
   font-size: 20px;
   border-radius: 10px;
   text-align: center;
   box-shadow: 0px 0px 15px rgba(0, 0, 06, 0.6);
 }
-
 .confirm-content h2 {
   margin-top: 0;
+  color: var(--text-color);
 }
-
+.confirm-content p {
+  color: var(--text-color);
+}
 .confirm-buttons {
   margin-top: 20px;
 }
-
 .confirm-buttons button {
   margin: 0 10px;
   padding: 10px 20px;
@@ -427,6 +442,9 @@ cursor: pointer;
   .list-of-item {
     padding: 14px;
   }
+  .todoImage{
+    width: 300px;
+  }
   .confirm-content{
     padding: 15px;
   }
@@ -436,4 +454,10 @@ cursor: pointer;
   .confirm-content h2 {
  font-size: 23px;
   }
+  .message{
+    font-size: 16px;
+    }
+    #edit-mode-cancel{
+      top:20px;
+    }
 }

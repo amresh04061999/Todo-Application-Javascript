@@ -1,7 +1,4 @@
-/*
-@Name : Amresh
-@Description :  Initialize Firebase module using link
-*/
+/** */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-analytics.js";
 import {
@@ -21,7 +18,7 @@ import {
   remove,
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 
-/*
+/** 
 @Name : Amresh
 @Description : This is config with firebase 
 */
@@ -35,7 +32,7 @@ const firebaseConfig = {
   appId: "1:685467623041:web:5486f224a7c572d49bf780",
   measurementId: "G-PZ65MB7YY0",
 };
-/*
+/** 
 @Name : Amresh
 @Description : This is config with firebase 
 */
@@ -44,7 +41,7 @@ const analytics = getAnalytics(app);
 const auth = getAuth(app);
 const database = getDatabase(app);
 
-/*
+/** 
 @Name : Amresh
 @Description : Here Create all Globle variable
 */
@@ -54,9 +51,8 @@ let completedKeys = [];
 let allTodoKeys = [];
 let filter = "all";
 let profileImage = "";
-let deleteStatus = "";
 
-/*
+/** 
 @Name : Amresh
 @Description : Google Sign-In Functionality
 */
@@ -88,7 +84,7 @@ function googleSignIn() {
     });
 }
 
-/*
+/** 
 @Name : Amresh
 @Description : Function to check if the user exists in the database
 */
@@ -109,7 +105,7 @@ function checkIfUserExists(userId, user) {
       console.error("Error checking if user exists:", error.message);
     });
 }
-/*
+/** 
 @Name : Amresh
 @Description : Function to store new user data in the database
 */
@@ -130,7 +126,7 @@ function storeUserData(userId, user) {
     });
 }
 
-/*
+/** 
 @Name : Amresh
 @Description :  Handle Auth State Changes
 */
@@ -183,29 +179,26 @@ onAuthStateChanged(auth, (user) => {
     }
   }
 });
-/*
+/** 
 @Name : Amresh
 @Description : Signout google account 
 */
 function googleSignOut() {
   signOut(auth)
     .then(() => {
-      console.log("dd");
-      // const profileImage = document.getElementById("profileImage");
-      // profileImage.src="";
       localStorage.clear();
       getTodo();
     })
     .catch((error) => {});
 }
-/*
+/** 
 @Name : Amresh
 @Description :  addEventListener click on googleSignIn()
 */
 document
   .getElementById("googleSignInButton")
   .addEventListener("click", googleSignIn);
-/*
+/** 
 @Name : Amresh
 @Description :  addEventListener click on googleSignOut()
 */
@@ -213,27 +206,27 @@ document
   .getElementById("googleSignioutButton")
   .addEventListener("click", googleSignOut);
 
-/*
+/** 
 @Name : Amresh
 @Description :  Store inputvalue in this variable
 */
 const inputValue = document.getElementById("input-value");
-
-/*
+const editModeCancle = document.getElementById("edit-mode-cancel");
+/** 
 @Name : Amresh
 @Description : Set light/dark mode
 */
 const themeToggleBtn = document.getElementById("theme-toggle");
 const currentTheme = localStorage.getItem("theme") || "light";
 document.documentElement.setAttribute("data-theme", currentTheme);
-/*
+/** 
 @Name : Amresh
 @Description : Set light/dark icon color
 */
 const currentcolor = localStorage.getItem("color") || "black";
 themeToggleBtn.style.color = currentcolor;
 
-/*
+/** 
 @Name : Amresh
 @Description : Click on icon dark and ligt mode set 
 */
@@ -252,7 +245,7 @@ themeToggleBtn.addEventListener("click", function () {
   }
 });
 
-/*
+/** 
 @Name : Amresh
 @Description :showloader function call loader 
 */
@@ -263,7 +256,7 @@ function showLoader() {
   blurContainer.classList.add("blur-container");
 }
 
-/*
+/** 
 @Name : Amresh
 @Description :hideLoader function call  hide loader
 */
@@ -274,7 +267,7 @@ function hideLoader() {
   blurContainer.classList.remove("blur-container");
 }
 
-/*
+/** 
 @Name : Amresh
 @Description :Check key value and call functon postTodo and editTodo
 */
@@ -288,7 +281,7 @@ inputValue.addEventListener("keydown", function (e) {
   }
 });
 
-/*
+/** 
 @Name : Amresh
 @Description : Get Todo Data from Firebase
 */
@@ -310,7 +303,7 @@ async function getTodo() {
   }
 }
 
-/*
+/** 
 @Name : Amresh
 @Description : Post  Todo Data to Firebase
 */
@@ -329,7 +322,7 @@ async function postTodo() {
   }
 }
 
-/*
+/** 
 @Name : Amresh
 @Description : This method edit todo item  after after edit get new todo list
 */
@@ -346,12 +339,13 @@ function editTodoDetail() {
     });
 }
 // Render data with filter
-/*
+/** 
 @Name : Amresh
 @Description :Render todo base on filter by all active and completed  
 */
 function renderData(data) {
   const tabs = document.querySelectorAll(".tab");
+  let draggedItem = null;
   function removeActiveClass() {
     tabs.forEach((tab) => tab.classList.remove("active"));
   }
@@ -360,7 +354,6 @@ function renderData(data) {
       removeActiveClass();
       tab.classList.add("active");
       filter = tab.getAttribute("data-filter");
-      console.log(filter);
       renderData(data);
     });
   });
@@ -406,7 +399,28 @@ function renderData(data) {
       }
       // Create div to insert all details
       const itemDiv = document.createElement("div");
+      itemDiv.setAttribute("draggable", "true");
+      itemDiv.setAttribute("data-index", key);
       itemDiv.classList.add("list-of-item");
+      // Drag-and-drop event listeners
+      itemDiv.addEventListener("dragstart", function () {
+        draggedItem = itemDiv;
+      });
+
+      itemDiv.addEventListener("dragend", function () {
+          draggedItem = null;
+      });
+
+      itemDiv.addEventListener("dragover", function (e) {
+        e.preventDefault();
+      });
+
+      itemDiv.addEventListener("drop", function () {
+        if (draggedItem !== itemDiv) {
+          container.insertBefore(draggedItem, itemDiv.nextSibling);
+          // Update the data structure to reflect the new order if necessary
+        }
+      });
       // Create Checkbox
       const checkbox = document.createElement("input");
       checkbox.type = "checkbox";
@@ -419,6 +433,7 @@ function renderData(data) {
       const userInputElement = document.createElement("p");
       userInputElement.textContent = item.userInput;
       if (item.completed) {
+        editCancekl();
         userInputElement.style.textDecorationLine = "line-through";
       }
       // Edit and delete icons
@@ -427,6 +442,7 @@ function renderData(data) {
         editIcon.classList.add("bi", "bi-pencil-square");
         editIcon.style.cursor = "pointer";
         editIcon.addEventListener("click", () => {
+          editModeCancle.classList.remove("hidden");
           editKey = key;
           inputValue.value = item.userInput;
         });
@@ -435,10 +451,10 @@ function renderData(data) {
       deleteIcon.classList.add("bi", "bi-trash");
       deleteIcon.style.cursor = "pointer";
       deleteIcon.addEventListener("click", () => {
-        deleteStatus = "delete";
+        const deleteStatus = "delete";
+        editCancekl();
         showConfirmBox(key, deleteStatus);
       });
-
       // Action div
       const actionDiv = document.createElement("div");
       actionDiv.append(editIcon);
@@ -453,8 +469,17 @@ function renderData(data) {
   }
   hideLoader();
 }
-
-/*
+/** 
+@Name : Amresh
+@Description : This method edit mode cancle
+*/
+editModeCancle.addEventListener("click", editCancekl);
+function editCancekl() {
+  editKey = "";
+  inputValue.value = "";
+  editModeCancle.classList.add("hidden");
+}
+/** 
 @Name : Amresh
 @Description : This method call checkboxFunction and check toto completed or not 
               after get Todo
@@ -470,7 +495,7 @@ function checkboxFunction(key, checkBoxValue) {
     });
 }
 
-/*
+/** 
 @Name : Amresh
 @Description : This method delete todo item  after delete get new todo list
 */
@@ -484,19 +509,52 @@ function deleteTodoItem(key) {
       console.log("Error deleting data:", error);
     });
 }
-/*
+
+/** 
+@Name : Amresh
+@Description : This method  delete all todo item in firebase database and update todo list
+*/
+function showConfirmBox(keys, deleteStatus) {
+  document.getElementById("confirmBox").style.display = "flex";
+  const confirm = document.getElementById("confirm");
+  const cancel = document.getElementById("cancel");
+  confirm.addEventListener("click", () => {
+    switch (deleteStatus) {
+      case "delete":
+        deleteTodoItem(keys);
+        document.getElementById("confirmBox").style.display = "none";
+        break;
+      case "deleteAll":
+        deleteAllTodoItems(keys);
+        document.getElementById("confirmBox").style.display = "none";
+        break;
+      case "deleteCompleted":
+        deleteCompletedToditem(keys);
+        document.getElementById("confirmBox").style.display = "none";
+        break;
+      default:
+        break;
+    }
+  });
+  cancel.addEventListener("click", () => {
+    document.getElementById("confirmBox").style.display = "none";
+  });
+}
+
+/** 
 @Name : Amresh
 @Description : get  reference and click on eventlistner or call deleteCompletedToditem 
 */
-const clearCompleted = document.getElementById("clearCompleted");
-// Add event listener to clear completed items
-clearCompleted.addEventListener("click", async () => {
-  deleteStatus = "deleteCompleted";
-  console.log(completedKeys);
-  
-  showConfirmBox(completedKeys.deleteStatus);
-});
-/*
+if (completedKeys.length === 0) {
+  const clearCompleted = document.getElementById("clearCompleted");
+  clearCompleted.addEventListener("click", () => {
+    const deleteStatus = "deleteCompleted";
+    console.log(completedKeys);
+    showConfirmBox(completedKeys, deleteStatus);
+  });
+}
+
+/** 
 @Name : Amresh
 @Description : This method  delete comppleted all todo item in fire base database and update todo list
 */
@@ -514,21 +572,20 @@ async function deleteCompletedToditem(keys) {
   }
 }
 
-/*
+/** 
 @Name : Amresh
 @Description : get reference and click on eventlistner or call deleteAllTodoItems 
 */
 if (allTodoKeys.length === 0) {
   const clearAll = document.getElementById("clearAll");
-  // Add event listener to clear completed items
-  clearAll.addEventListener("click", async () => {
-    deleteStatus = "deleteAll";
+  clearAll.addEventListener("click", () => {
+    const deleteStatus = "deleteAll";
     showConfirmBox(allTodoKeys, deleteStatus);
   });
   getTodo();
 }
 
-/*
+/** 
 @Name : Amresh
 @Description : This method  delete all todo item in firebase database and update todo list
 */
@@ -544,32 +601,4 @@ async function deleteAllTodoItems(Keys) {
   } catch (error) {
     console.log("Error deleting data:", error);
   }
-}
-
-/*
-@Name : Amresh
-@Description : This method  delete all todo item in firebase database and update todo list
-*/
-function showConfirmBox(keys, deleteStatus) {
-  console.log(keys);
-  
-  document.getElementById("confirmBox").style.display = "flex";
-  const confirm = document.getElementById("confirm");
-  const cancel = document.getElementById("cancel");
-  confirm.addEventListener("click", () => {
-    switch (deleteStatus) {
-      case "delete": deleteTodoItem(keys);
-        break;
-      case "deleteAll": deleteAllTodoItems(keys);
-        break;
-      case "deleteCompleted": deleteCompletedToditem(keys);
-        break;
-      default:
-        break;
-    }
-    document.getElementById("confirmBox").style.display = "none";
-  });
-  cancel.addEventListener("click", () => {
-    document.getElementById("confirmBox").style.display = "none";
-  });
 }
